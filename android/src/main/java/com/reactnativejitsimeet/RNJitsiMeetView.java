@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.uimanager.annotations.ReactProp;
 
 import org.jitsi.meet.sdk.BaseReactView;
 import org.jitsi.meet.sdk.JitsiMeet;
@@ -33,6 +34,8 @@ public class RNJitsiMeetView extends BaseReactView<JitsiMeetViewListener>
     // XXX Currently, one thread writes and one thread reads, so it should be
     // fine to have this field volatile without additional synchronization.
     private volatile String url;
+
+    private Bundle props;
 
     /**
      * Helper method to recursively merge 2 {@link Bundle} objects representing React Native props.
@@ -83,7 +86,7 @@ public class RNJitsiMeetView extends BaseReactView<JitsiMeetViewListener>
 
     public RNJitsiMeetView(@NonNull Context context) {
         super(context);
-
+        props = new Bundle();
         RNOngoingConferenceTracker.getInstance().addListener(this);
     }
 
@@ -123,14 +126,25 @@ public class RNJitsiMeetView extends BaseReactView<JitsiMeetViewListener>
         setProps(new Bundle());
     }
 
+    @ReactProp(name = "featureFlags")
+    public void setFeatureFlags(RNJitsiMeetView view, @Nullable ReadableMap flags) {
+        RNJitsiMeetConferenceOptions.Builder builder = new RNJitsiMeetConferenceOptions.Builder();
+        while (flags.keySetIterator().hasNextKey()) {
+            String flagName = flags.keySetIterator().nextKey();
+            builder.setFeatureFlag(flagName, flags.getBoolean(flagName));
+        }
+        RNJitsiMeetConferenceOptions options = builder.build();
+        setProps(options.asProps());
+    }
+
     /**
      * Helper method to set the React Native props.
      * @param newProps - New props to be set on the React Native view.
      */
     private void setProps(@NonNull Bundle newProps) {
         // Merge the default options with the newly provided ones.
-        Bundle props = mergeProps(new Bundle(), newProps);
-
+        Bundle props = mergeProps(this.props, newProps);
+        this.props = props;
         // XXX The setProps() method is supposed to be imperative i.e.
         // a second invocation with one and the same URL is expected to join
         // the respective conference again if the first invocation was followed
