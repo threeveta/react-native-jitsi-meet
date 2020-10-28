@@ -2,14 +2,13 @@ package com.reactnativejitsimeet;
 
 import android.content.Context;
 import android.os.Bundle;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.facebook.react.bridge.ReadableMap;
-import com.facebook.react.uimanager.annotations.ReactProp;
 
 import org.jitsi.meet.sdk.BaseReactView;
-import org.jitsi.meet.sdk.JitsiMeet;
 import org.jitsi.meet.sdk.JitsiMeetViewListener;
 import org.jitsi.meet.sdk.ListenerUtils;
 import org.jitsi.meet.sdk.log.JitsiMeetLogger;
@@ -35,7 +34,7 @@ public class RNJitsiMeetView extends BaseReactView<JitsiMeetViewListener>
     // fine to have this field volatile without additional synchronization.
     private volatile String url;
 
-    private Bundle props;
+    private Bundle defaultProps;
 
     /**
      * Helper method to recursively merge 2 {@link Bundle} objects representing React Native props.
@@ -86,7 +85,7 @@ public class RNJitsiMeetView extends BaseReactView<JitsiMeetViewListener>
 
     public RNJitsiMeetView(@NonNull Context context) {
         super(context);
-        props = new Bundle();
+        defaultProps = new Bundle();
         RNOngoingConferenceTracker.getInstance().addListener(this);
     }
 
@@ -126,25 +125,13 @@ public class RNJitsiMeetView extends BaseReactView<JitsiMeetViewListener>
         setProps(new Bundle());
     }
 
-    @ReactProp(name = "featureFlags")
-    public void setFeatureFlags(RNJitsiMeetView view, @Nullable ReadableMap flags) {
-        RNJitsiMeetConferenceOptions.Builder builder = new RNJitsiMeetConferenceOptions.Builder();
-        while (flags.keySetIterator().hasNextKey()) {
-            String flagName = flags.keySetIterator().nextKey();
-            builder.setFeatureFlag(flagName, flags.getBoolean(flagName));
-        }
-        RNJitsiMeetConferenceOptions options = builder.build();
-        setProps(options.asProps());
-    }
-
     /**
      * Helper method to set the React Native props.
      * @param newProps - New props to be set on the React Native view.
      */
     private void setProps(@NonNull Bundle newProps) {
         // Merge the default options with the newly provided ones.
-        Bundle props = mergeProps(this.props, newProps);
-        this.props = props;
+        Bundle props = mergeProps(this.defaultProps, newProps);
         // XXX The setProps() method is supposed to be imperative i.e.
         // a second invocation with one and the same URL is expected to join
         // the respective conference again if the first invocation was followed
@@ -157,6 +144,10 @@ public class RNJitsiMeetView extends BaseReactView<JitsiMeetViewListener>
         props.putLong("timestamp", System.currentTimeMillis());
 
         createReactRootView("App", props);
+    }
+
+    public void setDefaultProps(@NonNull Bundle newProps) {
+        this.defaultProps = mergeProps(this.defaultProps, newProps);
     }
 
     /**

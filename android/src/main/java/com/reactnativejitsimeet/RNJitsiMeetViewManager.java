@@ -2,11 +2,14 @@ package com.reactnativejitsimeet;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactApplicationContext;
-import com.facebook.react.bridge.ReactContext;
+import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.ReadableMapKeySetIterator;
+import com.facebook.react.bridge.ReadableType;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.common.MapBuilder;
 import com.facebook.react.uimanager.SimpleViewManager;
 import com.facebook.react.uimanager.ThemedReactContext;
+import com.facebook.react.uimanager.annotations.ReactProp;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
 import com.facebook.react.module.annotations.ReactModule;
 
@@ -14,7 +17,8 @@ import org.jitsi.meet.sdk.JitsiMeetViewListener;
 
 import java.util.Map;
 
-import static java.security.AccessController.getContext;
+import androidx.annotation.Nullable;
+
 
 @ReactModule(name = RNJitsiMeetViewManager.REACT_CLASS)
 public class RNJitsiMeetViewManager extends SimpleViewManager<RNJitsiMeetView> implements JitsiMeetViewListener {
@@ -40,6 +44,25 @@ public class RNJitsiMeetViewManager extends SimpleViewManager<RNJitsiMeetView> i
             mJitsiMeetViewReference.setJitsiMeetView(view);
         }
         return mJitsiMeetViewReference.getJitsiMeetView();
+    }
+
+    @ReactProp(name = "featureFlags")
+    public void setFeatureFlags(RNJitsiMeetView view, @Nullable ReadableMap flags) {
+        RNJitsiMeetConferenceOptions.Builder builder = new RNJitsiMeetConferenceOptions.Builder();
+        ReadableMapKeySetIterator iterator = flags.keySetIterator();
+        while (iterator.hasNextKey()) {
+            String flagName = iterator.nextKey();
+            ReadableType type = flags.getType(flagName);
+            if (type == ReadableType.Boolean) {
+                builder.setFeatureFlag(flagName, flags.getBoolean(flagName));
+            } else if (type == ReadableType.Number) {
+                builder.setFeatureFlag(flagName, flags.getInt(flagName));
+            } else if (type == ReadableType.String) {
+                builder.setFeatureFlag(flagName, flags.getString(flagName));
+            }
+        }
+        RNJitsiMeetConferenceOptions options = builder.build();
+        view.setDefaultProps(options.asProps());
     }
 
     public void onConferenceJoined(Map<String, Object> data) {
