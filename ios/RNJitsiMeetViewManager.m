@@ -12,6 +12,7 @@ RCT_EXPORT_VIEW_PROPERTY(onConferenceTerminated, RCTBubblingEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onConferenceWillJoin, RCTBubblingEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onEnteredPip, RCTBubblingEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(featureFlags, NSDictionary)
+RCT_EXPORT_VIEW_PROPERTY(colorScheme, NSDictionary)
 
 - (UIView *)view
 {
@@ -49,6 +50,7 @@ RCT_EXPORT_METHOD(call:(NSString *)urlString userInfo:(NSDictionary *)userInfo)
                 BOOL value =[[self->jitsiMeetView.featureFlags objectForKey:(key)]boolValue];
                 [builder setFeatureFlag:(key) withBoolean:(value)];
             }
+            [builder setColorScheme:self->jitsiMeetView.colorScheme];
         }];
         [jitsiMeetView join:options];
     });
@@ -79,6 +81,7 @@ RCT_EXPORT_METHOD(audioCall:(NSString *)urlString userInfo:(NSDictionary *)userI
                 BOOL value =[[self->jitsiMeetView.featureFlags objectForKey:(key)]boolValue];
                 [builder setFeatureFlag:(key) withBoolean:(value)];
             }
+            [builder setColorScheme:self->jitsiMeetView.colorScheme];
         }];
         [jitsiMeetView join:options];
     });

@@ -8,4 +8,5 @@
 @property (nonatomic, copy) RCTBubblingEventBlock onConferenceWillJoin;
 @property (nonatomic, copy) RCTBubblingEventBlock onEnteredPip;
 @property (nonatomic, copy) NSDictionary * featureFlags;
+@property (nonatomic, copy) NSDictionary * colorScheme;
 @end
