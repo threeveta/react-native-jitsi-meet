@@ -11,6 +11,7 @@ RCT_EXPORT_VIEW_PROPERTY(onConferenceJoined, RCTBubblingEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onConferenceTerminated, RCTBubblingEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onConferenceWillJoin, RCTBubblingEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onEnteredPip, RCTBubblingEventBlock)
+RCT_EXPORT_VIEW_PROPERTY(featureFlags, NSDictionary)
 
 - (UIView *)view
 {
@@ -44,6 +45,10 @@ RCT_EXPORT_METHOD(call:(NSString *)urlString userInfo:(NSDictionary *)userInfo)
         JitsiMeetConferenceOptions *options = [JitsiMeetConferenceOptions fromBuilder:^(JitsiMeetConferenceOptionsBuilder *builder) {        
             builder.room = urlString;
             builder.userInfo = _userInfo;
+            for(id key in self->jitsiMeetView.featureFlags) {
+                BOOL value =[[self->jitsiMeetView.featureFlags objectForKey:(key)]boolValue];
+                [builder setFeatureFlag:(key) withBoolean:(value)];
+            }
         }];
         [jitsiMeetView join:options];
     });
@@ -70,6 +75,10 @@ RCT_EXPORT_METHOD(audioCall:(NSString *)urlString userInfo:(NSDictionary *)userI
             builder.room = urlString;
             builder.userInfo = _userInfo;
             builder.audioOnly = YES;
+            for(id key in self->jitsiMeetView.featureFlags) {
+                BOOL value =[[self->jitsiMeetView.featureFlags objectForKey:(key)]boolValue];
+                [builder setFeatureFlag:(key) withBoolean:(value)];
+            }
         }];
         [jitsiMeetView join:options];
     });
