@@ -65,6 +65,14 @@ public class RNJitsiMeetViewManager extends SimpleViewManager<RNJitsiMeetView> i
         view.setDefaultProps(options.asProps());
     }
 
+    @ReactProp(name = "colorScheme")
+    public void setColorScheme(RNJitsiMeetView view, @Nullable ReadableMap colorScheme) {
+        RNJitsiMeetConferenceOptions.Builder builder = new RNJitsiMeetConferenceOptions.Builder();
+        builder.setColorScheme(BundleConverter.toBundle(colorScheme));
+        RNJitsiMeetConferenceOptions options = builder.build();
+        view.setDefaultProps(options.asProps());
+    }
+
     public void onConferenceJoined(Map<String, Object> data) {
         WritableMap event = Arguments.createMap();
         event.putString("url", (String) data.get("url"));
